@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Cambridge Bike Racks</title>
+	
+	<!-- the Leaflet CSS -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+	
+	<!-- the Leaflet JavaScript library -->
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="legend/leaflet.legend.css" />
+	<script src="legend/leaflet.legend.js"></script>
+	
+	<!-- Leaflet.markercluster CSS links -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
+	
+	<!-- Leaflet.markercluster JS link -->
+	<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+	
+	<!--CSS styles-->
+	<style>
+	body {
+        background-image: url("Photos/CambridgeStreetscape.jpg");
+		background-color: #b0dbf7;
+		font-family: sans-serif;
+		max-width: 1200px;
+		margin: auto;
+    }
+	h1 {
+		background-color: #ffffff;
+		opacity: .8;
+		padding-left: 15px;
+	}
+	p {
+		background-color: #ffffff;
+		opacity: .8;
+		padding: 5px 15px 5px 15px;
+	}
+	</style>
+
+</head>
+
+<body>
+
+	<h1>Bike Racks in Cambridge, MA</h1>
+
+	<!-- code where we create and name the container that holds the map -->
+	<div id="mymap" style="height: 80vh"></div>
+
+	<p>This map shows the location of all bike racks on public land in Cambridge, MA. Data comes from <a href="https://www.cambridgema.gov/GIS/gisdatadictionary/Recreation/RECREATION_BikeRacks">the City of Cambridge's Geographic Information System</a>. Bike racks in close proximity with one another have been clustered. Click on the clusters to find the individual bike rack points. Information about the capacity and status of the bike racks can be found by clicking on the bike rack points. (<a href = "https://commons.wikimedia.org/wiki/File:Streeteries,_Cambridge,_Massachusetts_-_Asmara_Eritrean_Restaurant_-_%E2%80%9CCHANGE_is_CONSTANT%E2%80%9D.jpg">Backgound image courtesy of Sharon Hahn Darlin</a>).</p>
+
+	<!-- code where we build the map and its functionality -->
+	<script>
+		var mymap = L.map('mymap').setView([42.37978315876597, -71.1172867656681], 14);
+		var basemap = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png', {
+			attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+		}).addTo(mymap);
+
+		//Add Bike Rack GeoJSON file
+		$.getJSON('Data/BikeRacks_WGS84_JSON.json',function(data){
+			var bikeRacks = L.geoJson(data, {
+				pointToLayer: function(feature, latlng){
+				var marker = L.marker(latlng, {icon: L.icon({
+					iconUrl: "Photos/BikeRack.png",
+					iconSize: [64, 64],
+				})})
+				marker.bindPopup("Capacity: " + feature.properties.Capacity + "<br>Status: " + feature.properties.Status);
+				return marker;
+				}
+			});
+			var clusters = L.markerClusterGroup({
+				showCoverageOnHover: false
+				});
+			clusters.addLayer(bikeRacks);
+			mymap.addLayer(clusters);
+		});
+
+	</script>
+</body>
+</html>
